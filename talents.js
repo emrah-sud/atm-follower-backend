@@ -1,0 +1,27 @@
+// slug -> handles. slug MUST match the talent's URL path on the site (e.g. /matilda -> "matilda").
+// Handle same for both platforms by default here — verify each talent's actual IG handle,
+// some may differ from their TikTok @, edit as needed.
+export const TALENTS = {
+  matilda:     { tiktok: "matildawilmakosel", instagram: "matildawilmakosel" },
+  brina:       { tiktok: "brinaslovelanguage", instagram: "brinaslovelanguage" },
+  dunya:       { tiktok: "dunyaaa44", instagram: "dunyaaa44" },
+  melika:      { tiktok: "melikezdn", instagram: "melikezdn" },
+  eliana:      { tiktok: "eliana.bajrami", instagram: "eliana.bajrami" },
+  altina:      { tiktok: "altina.hajd", instagram: "altina.hajd" },
+  "lola-und":  { tiktok: "lolaundjanni", instagram: "lolaundjanni" },
+  "brina-und": { tiktok: "brinaundsergej", instagram: "brinaundsergej" },
+  tijen:       { tiktok: "tijen_y", instagram: "tijen_y" },
+  tia:         { tiktok: "tiasalg", instagram: "tiasalg" },
+  zia:         { tiktok: "kurdinausjapann", instagram: "kurdinausjapann" },
+  parmis:      { tiktok: "parmis.sly", instagram: "parmis.sly" },
+  nilo:        { tiktok: "nilotchii", instagram: "nilotchii" },
+  michelle:    { tiktok: "michelleknaub", instagram: "michelleknaub" },
+  stella:      { tiktok: "stellaxgabriella", instagram: "stellaxgabriella" },
+  elif:        { tiktok: "elifsa__", instagram: "elifsa__" },
+  avenda:      { tiktok: "avendaaxs", instagram: "avendaaxs" },
+  sedat:       { tiktok: "sedat.462", instagram: "sedat.462" },
+  maria:       { tiktok: "maria.std1", instagram: "maria.std1" },
+  sandra:      { tiktok: "sanndralzze", instagram: "sanndralzze" },
+  francesca:   { tiktok: "francesca.wz", instagram: "francesca.wz" },
+  zoe:         { tiktok: "zoesalg", instagram: "zoesalg" },
+};
