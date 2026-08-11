@@ -7,19 +7,31 @@ import { getCached, setCached } from "./cache.js";
 const DELAY_BETWEEN_TALENTS_MS = 4000;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Retry once after a short pause — catches transient blips (rate-limit,
+// momentary bad response) without hammering the platform on real failures.
+async function withRetry(fn, label) {
+  try {
+    return await fn();
+  } catch (err) {
+    console.warn(`[refresh] ${label} first attempt failed (${err.message}), retrying once...`);
+    await sleep(2000);
+    return await fn();
+  }
+}
+
 async function refreshOne(slug) {
   const handles = TALENTS[slug];
   const prev = getCached(slug) || {};
   const result = { tiktok: prev.tiktok ?? null, instagram: prev.instagram ?? null };
 
   try {
-    result.tiktok = await scrapeTikTok(handles.tiktok);
+    result.tiktok = await withRetry(() => scrapeTikTok(handles.tiktok), `${slug} tiktok`);
   } catch (err) {
     console.warn(`[refresh] ${slug} tiktok failed: ${err.message} — keeping last known value`);
   }
 
   try {
-    result.instagram = await scrapeInstagram(handles.instagram);
+    result.instagram = await withRetry(() => scrapeInstagram(handles.instagram), `${slug} instagram`);
   } catch (err) {
     console.warn(`[refresh] ${slug} instagram failed: ${err.message} — keeping last known value`);
   }
