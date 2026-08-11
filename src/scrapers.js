@@ -30,12 +30,35 @@ export async function scrapeTikTok(handle) {
 
 /**
  * Scrape Instagram public profile follower count.
- * Instagram aggressively gates this — unauthenticated HTML often shows a
- * login wall instead of profile data. This best-effort tries the meta
- * description tag ("1,234 Followers, ..."), which sometimes survives.
- * Expect this to fail more often than the TikTok scraper.
+ * Instagram aggressively gates plain HTML scraping (login wall). This tries
+ * the internal endpoint the IG web client itself calls first (works longer
+ * before getting blocked, since it's a real API path rather than the HTML
+ * shell), then falls back to parsing the og:description meta tag.
+ * Still unofficial — expect this to need occasional maintenance.
  */
 export async function scrapeInstagram(handle) {
+  // Attempt 1: IG's own web_profile_info endpoint (used by instagram.com's web app).
+  // The x-ig-app-id value below is IG's public web client app id, not a secret.
+  try {
+    const apiUrl = `https://i.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(handle)}`;
+    const res = await fetch(apiUrl, {
+      headers: {
+        "User-Agent": UA,
+        "Accept-Language": "en-US,en;q=0.9",
+        "x-ig-app-id": "936619743392459",
+        "Accept": "*/*",
+      },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const count = data?.data?.user?.edge_followed_by?.count;
+      if (typeof count === "number") return count;
+    }
+  } catch {
+    // fall through to HTML fallback
+  }
+
+  // Attempt 2: plain HTML og:description ("1,234 Followers, ...")
   const url = `https://www.instagram.com/${handle}/`;
   const res = await fetch(url, {
     headers: { "User-Agent": UA, "Accept-Language": "en-US,en;q=0.9" },
@@ -43,12 +66,11 @@ export async function scrapeInstagram(handle) {
   if (!res.ok) throw new Error(`instagram fetch ${res.status}`);
   const html = await res.text();
 
-  // og:description usually: "1,234 Followers, 56 Following, 78 Posts - See..."
   const match = html.match(/content="([\d.,]+)\s+Followers/i);
   if (match) {
     const num = parseInt(match[1].replace(/[.,]/g, ""), 10);
     if (!Number.isNaN(num)) return num;
   }
 
-  throw new Error("instagram follower count not found (likely login-walled)");
+  throw new Error("instagram follower count not found (API + HTML both failed)");
 }
