@@ -7,13 +7,11 @@ import { refreshAll } from "./refresh.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS — restrict to your actual Framer domain in production instead of "*".
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   next();
 });
 
-// Matches ENDPOINT_BASE in the frontend widget: /api/talents/followers?talent=matilda
 app.get("/api/talents/followers", (req, res) => {
   const slug = req.query.talent;
   if (!slug || !TALENTS[slug]) {
@@ -35,12 +33,12 @@ app.listen(PORT, () => {
   console.log(
     `[server] APIFY_TOKEN present: ${Boolean(process.env.APIFY_TOKEN)}, APIFY_ACTOR_ID: ${process.env.APIFY_ACTOR_ID || "(not set)"}`
   );
-  // Run once on boot so cache isn't empty, then on schedule.
   refreshAll();
 });
 
-// Every 15 min. TikTok/Instagram will rate-limit or block an IP that scrapes
-// too often — do not drop this below ~10 min without a rotating-proxy setup.
-cron.schedule("*/15 * * * *", () => {
+// Every 30 min. With Apify configured, each Instagram call takes ~60-90sec,
+// so a full 22-talent cycle takes ~25-30 min — going more frequent than this
+// would overlap runs.
+cron.schedule("*/30 * * * *", () => {
   refreshAll();
 });
