@@ -30,8 +30,11 @@ async function refreshOne(slug) {
     console.warn(`[refresh] ${slug} tiktok failed: ${err.message} — keeping last known value`);
   }
 
+  // No retry here — Apify calls already take 30-90sec each, doubling that
+  // per-talent risks overlapping into the next scheduled run. A failure here
+  // just gets picked up on the next cron cycle instead.
   try {
-    result.instagram = await withRetry(() => scrapeInstagram(handles.instagram), `${slug} instagram`);
+    result.instagram = await scrapeInstagram(handles.instagram);
   } catch (err) {
     console.warn(`[refresh] ${slug} instagram failed: ${err.message} — keeping last known value`);
   }
@@ -40,11 +43,22 @@ async function refreshOne(slug) {
   console.log(`[refresh] ${slug}: tiktok=${result.tiktok} instagram=${result.instagram}`);
 }
 
+let isRunning = false;
+
 export async function refreshAll() {
-  console.log(`[refresh] starting run for ${Object.keys(TALENTS).length} talents`);
-  for (const slug of Object.keys(TALENTS)) {
-    await refreshOne(slug);
-    await sleep(DELAY_BETWEEN_TALENTS_MS);
+  if (isRunning) {
+    console.warn("[refresh] skipping run — previous cycle still in progress");
+    return;
   }
-  console.log("[refresh] run complete");
+  isRunning = true;
+  try {
+    console.log(`[refresh] starting run for ${Object.keys(TALENTS).length} talents`);
+    for (const slug of Object.keys(TALENTS)) {
+      await refreshOne(slug);
+      await sleep(DELAY_BETWEEN_TALENTS_MS);
+    }
+    console.log("[refresh] run complete");
+  } finally {
+    isRunning = false;
+  }
 }
