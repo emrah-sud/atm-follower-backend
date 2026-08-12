@@ -17,11 +17,9 @@ export async function scrapeTikTok(handle) {
   if (!res.ok) throw new Error(`tiktok fetch ${res.status}`);
   const html = await res.text();
 
-  // Try modern embed first
   let match = html.match(/"followerCount":(\d+)/);
   if (match) return parseInt(match[1], 10);
 
-  // Fallback: older SIGI_STATE shape
   match = html.match(/"stats":\{[^}]*"followerCount":(\d+)/);
   if (match) return parseInt(match[1], 10);
 
@@ -60,10 +58,11 @@ async function fetchInstagramViaApify(handle) {
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    // Most Apify IG actors accept either "usernames" (array) or "username" (single).
-    // Sending both covers common input-schema variants without needing to know
-    // the exact one in advance.
-    body: JSON.stringify({ usernames: [handle], username: handle }),
+    // Only send the array field. Also sending a singular "username" string
+    // caused a bug where the actor iterated the string character-by-character
+    // (JS treats strings as iterable), matching random single-letter profiles
+    // instead of the real handle.
+    body: JSON.stringify({ usernames: [handle] }),
   });
 
   if (!res.ok) throw new Error(`apify run failed: ${res.status}`);
@@ -71,7 +70,13 @@ async function fetchInstagramViaApify(handle) {
   const item = Array.isArray(items) ? items[0] : null;
   if (!item) throw new Error("apify returned no items");
 
-  // Different Apify IG actors name the field differently — check common variants.
+  // Safety check: confirm the actor actually returned data for the handle we
+  // asked for, not a different/mismatched profile.
+  const returnedUsername = item.username ?? item.ownerUsername;
+  if (returnedUsername && returnedUsername.toLowerCase() !== handle.toLowerCase()) {
+    throw new Error(`apify returned mismatched profile (asked for ${handle}, got ${returnedUsername})`);
+  }
+
   const count =
     item.followersCount ?? item.followers_count ?? item.followers ?? item.edge_followed_by?.count;
 
@@ -85,8 +90,6 @@ async function fetchInstagramViaApify(handle) {
  * to fail often from a cloud IP. See README for details.
  */
 async function scrapeInstagramFree(handle) {
-  // Attempt 1: IG's own web_profile_info endpoint (used by instagram.com's web app).
-  // The x-ig-app-id value below is IG's public web client app id, not a secret.
   try {
     const apiUrl = `https://i.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(handle)}`;
     const res = await fetch(apiUrl, {
@@ -106,7 +109,6 @@ async function scrapeInstagramFree(handle) {
     // fall through to HTML fallback
   }
 
-  // Attempt 2: plain HTML og:description ("1,234 Followers, ...")
   const url = `https://www.instagram.com/${handle}/`;
   const res = await fetch(url, {
     headers: { "User-Agent": UA, "Accept-Language": "en-US,en;q=0.9" },
