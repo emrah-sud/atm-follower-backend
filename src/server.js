@@ -32,6 +32,9 @@ app.get("/api/talents/followers", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`[server] listening on :${PORT}`);
+  console.log(
+    `[server] APIFY_TOKEN present: ${Boolean(process.env.APIFY_TOKEN)}, APIFY_ACTOR_ID: ${process.env.APIFY_ACTOR_ID || "(not set)"}`
+  );
   // Run once on boot so cache isn't empty, then on schedule.
   refreshAll();
 });
