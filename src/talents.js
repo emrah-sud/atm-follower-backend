@@ -1,27 +1,28 @@
 // slug -> handles. slug MUST match the talent's URL path on the site (e.g. /matilda -> "matilda").
-// Handle same for both platforms by default here — verify each talent's actual IG handle,
-// some may differ from their TikTok @, edit as needed.
+// IMPORTANT: TikTok and Instagram handles are NOT always the same — several
+// talents use a stylized/different handle on TikTok vs a plainer one on
+// Instagram. All 22 verified against real profile URLs.
 export const TALENTS = {
-  matilda:     { tiktok: "matildawilmakosel", instagram: "matildawilmakosel" },
-  brina:       { tiktok: "brinaslovelanguage", instagram: "brinaslovelanguage" },
-  dunya:       { tiktok: "dunyaaa44", instagram: "dunyaaa44" },
-  melika:      { tiktok: "melikezdn", instagram: "melikezdn" },
-  eliana:      { tiktok: "eliana.bajrami", instagram: "eliana.bajrami" },
+  matilda:     { tiktok: "matildakosel_", instagram: "matildakosel" },        // corrected — real tiktok differs from site display
+  brina:       { tiktok: "brinaslovelanguage", instagram: "brinabko" },
+  dunya:       { tiktok: "dunyaaa44", instagram: "44dunyaaa" },
+  melika:      { tiktok: "melikezdn", instagram: "melikee.zdn" },
+  eliana:      { tiktok: "eliana.bajrami", instagram: "elianabajrami" },
   altina:      { tiktok: "altina.hajd", instagram: "altina.hajd" },
   "lola-und":  { tiktok: "lolaundjanni", instagram: "lolaundjanni" },
   "brina-und": { tiktok: "brinaundsergej", instagram: "brinaundsergej" },
-  tijen:       { tiktok: "tijen_y", instagram: "tijen_y" },
-  tia:         { tiktok: "tiasalg", instagram: "tiasalg" },
-  zia:         { tiktok: "kurdinausjapann", instagram: "kurdinausjapann" },
+  tijen:       { tiktok: "tijen_y", instagram: "tijen_yildirim" },
+  tia:         { tiktok: "tiasalg", instagram: "tiasa1g" },
+  zia:         { tiktok: "kurdinausjapann", instagram: "ziakamo" },
   parmis:      { tiktok: "parmis.sly", instagram: "parmis.sly" },
-  nilo:        { tiktok: "nilotchii", instagram: "nilotchii" },
-  michelle:    { tiktok: "michelleknaub", instagram: "michelleknaub" },
+  nilo:        { tiktok: "nilotchii", instagram: "niloo.wlz" },
+  michelle:    { tiktok: "michelleknaub", instagram: "michelle.knaub" },
   stella:      { tiktok: "stellaxgabriella", instagram: "stellaxgabriella" },
   elif:        { tiktok: "elifsa__", instagram: "elifsa__" },
   avenda:      { tiktok: "avendaaxs", instagram: "avendaaxs" },
-  sedat:       { tiktok: "sedat.462", instagram: "sedat.462" },
+  sedat:       { tiktok: "sedat.462", instagram: "sedat_462" },
   maria:       { tiktok: "maria.std1", instagram: "maria.std1" },
-  sandra:      { tiktok: "sanndralzze", instagram: "sanndralzze" },
+  sandra:      { tiktok: "sandralzze", instagram: "sandralze" },              // corrected — single n on tiktok too
   francesca:   { tiktok: "francesca.wz", instagram: "francesca.wz" },
   zoe:         { tiktok: "zoesalg", instagram: "zoesalg" },
 };
