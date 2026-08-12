@@ -3,12 +3,6 @@ import fetch from "node-fetch";
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
 
-/**
- * Scrape TikTok public profile follower count.
- * TikTok embeds a JSON blob (SIGI_STATE or UNIVERSAL_DATA) in the page HTML
- * containing followerCount. This is unofficial and WILL break if TikTok
- * changes their page structure — treat as best-effort.
- */
 export async function scrapeTikTok(handle) {
   const url = `https://www.tiktok.com/@${handle}`;
   const res = await fetch(url, {
@@ -26,15 +20,6 @@ export async function scrapeTikTok(handle) {
   throw new Error("tiktok follower count not found in page (structure may have changed)");
 }
 
-/**
- * Instagram follower count via Apify's Instagram Followers Count Scraper API.
- * Paid, pay-per-result — sidesteps the login-wall/IP-block problem that makes
- * direct scraping from a cloud host unreliable. Requires two env vars:
- *   APIFY_TOKEN      — your Apify API token (Apify console → Settings → Integrations)
- *   APIFY_ACTOR_ID   — actor id, e.g. "api-empire~instagram-followers-count-scraper"
- * Falls back to the free unofficial scrape below if those aren't set, so this
- * still works (best-effort) without an Apify account configured.
- */
 export async function scrapeInstagram(handle) {
   if (process.env.APIFY_TOKEN && process.env.APIFY_ACTOR_ID) {
     try {
@@ -58,10 +43,6 @@ async function fetchInstagramViaApify(handle) {
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    // Only send the array field. Also sending a singular "username" string
-    // caused a bug where the actor iterated the string character-by-character
-    // (JS treats strings as iterable), matching random single-letter profiles
-    // instead of the real handle.
     body: JSON.stringify({ usernames: [handle] }),
   });
 
@@ -70,8 +51,6 @@ async function fetchInstagramViaApify(handle) {
   const item = Array.isArray(items) ? items[0] : null;
   if (!item) throw new Error("apify returned no items");
 
-  // Safety check: confirm the actor actually returned data for the handle we
-  // asked for, not a different/mismatched profile.
   const returnedUsername = item.username ?? item.ownerUsername;
   if (returnedUsername && returnedUsername.toLowerCase() !== handle.toLowerCase()) {
     throw new Error(`apify returned mismatched profile (asked for ${handle}, got ${returnedUsername})`);
@@ -80,15 +59,13 @@ async function fetchInstagramViaApify(handle) {
   const count =
     item.followersCount ?? item.followers_count ?? item.followers ?? item.edge_followed_by?.count;
 
-  if (typeof count !== "number") throw new Error("apify item had no recognizable follower field");
+  if (typeof count !== "number") {
+    console.warn(`[instagram] raw item for ${handle} (no follower field found):`, JSON.stringify(item).slice(0, 500));
+    throw new Error("apify item had no recognizable follower field");
+  }
   return count;
 }
 
-/**
- * Free/unofficial fallback (used only if Apify isn't configured, or its call fails).
- * Instagram aggressively gates plain HTML scraping (login wall) — expect this
- * to fail often from a cloud IP. See README for details.
- */
 async function scrapeInstagramFree(handle) {
   try {
     const apiUrl = `https://i.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(handle)}`;
