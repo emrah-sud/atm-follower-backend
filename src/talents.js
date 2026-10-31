@@ -6,7 +6,7 @@ export const TALENTS = {
   matilda:     { tiktok: "matildakosel_", instagram: "matildakosel" },
   brina:       { tiktok: "brinabanko", instagram: "brinabanko" },
   dunya:       { tiktok: "dunyaaa44", instagram: "44dunyaaa" },
-  melika:      { tiktok: "melikezdn", instagram: "melikee.zdn" },
+  melike:      { tiktok: "melikezdn", instagram: "melikee.zdn" },
   eliana:      { tiktok: "eliana.bajrami", instagram: "elianabajrami" },
   altina:      { tiktok: "altina.hajd", instagram: "altina.hajd" },
   "lola-und":  { tiktok: "lolaundjanni", instagram: "lolaundjanni" },

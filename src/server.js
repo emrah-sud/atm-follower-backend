@@ -1,7 +1,7 @@
 import express from "express";
 import cron from "node-cron";
 import { TALENTS } from "./talents.js";
-import { getCached, oldestUpdate } from "./cache.js";
+import { getCached, allCached, oldestUpdate } from "./cache.js";
 import { refreshAll } from "./refresh.js";
 
 const app = express();
@@ -10,6 +10,17 @@ const PORT = process.env.PORT || 3000;
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   next();
+});
+
+// All talents in one response — used by the /talents grid so it makes 1 request, not 21.
+app.get("/api/talents/followers/all", (req, res) => {
+  res.setHeader("Cache-Control", "public, max-age=300");
+  const all = allCached();
+  const out = {};
+  for (const slug of Object.keys(TALENTS)) {
+    if (all[slug]) out[slug] = { tiktok: all[slug].tiktok, instagram: all[slug].instagram, updatedAt: all[slug].updatedAt };
+  }
+  res.json(out);
 });
 
 app.get("/api/talents/followers", (req, res) => {
