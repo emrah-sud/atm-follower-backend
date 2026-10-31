@@ -26,4 +26,5 @@ export const TALENTS = {
   francesca:   { tiktok: "francesca.wz", instagram: "francesca.wz" },
   zoe:         { tiktok: "zoesalg", instagram: "zoesalg" },
   arwa:        { tiktok: "arwa.ltb", instagram: "arwaa.ltb" },
+  fjolla:      { tiktok: "fjollafetinci", instagram: "fjollafetinci" },
 };
