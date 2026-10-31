@@ -1,6 +1,6 @@
 # ATM Follower Backend
 
-Scrapes public TikTok/Instagram profile pages every 15 min, caches result,
+Scrapes public TikTok/Instagram profile pages 2x a day (09:00 and 15:00), caches result,
 serves via one endpoint. Pairs with `live-follower-count-all-talents.html`
 widget — its `ENDPOINT_BASE` should point at where you deploy this.
 
@@ -11,8 +11,15 @@ npm install
 npm start
 ```
 
-Server starts on `:3000` (set `PORT` env var to change), does an initial
-scrape on boot, then re-scrapes every 15 min.
+Server starts on `:3000` (set `PORT` env var to change). Results are saved to
+`cache.json` (set `CACHE_FILE` to change — use a persistent disk on your host).
+On boot it only scrapes if saved data is missing or older than 3h, then
+re-scrapes at 09:00 and 15:00 Europe/Berlin.
+
+Optional env vars:
+- `CRON_SCHEDULE` — default `0 9,15 * * *` (use `0 9,12,15 * * *` to add a noon run)
+- `CRON_TZ` — default `Europe/Berlin`
+- `CACHE_FILE` — default `./cache.json`
 
 ## Endpoint
 
@@ -43,8 +50,7 @@ const ENDPOINT_BASE = "https://your-backend-domain.com/api/talents/followers";
   TikTok side. On failure the endpoint keeps serving the last known good
   value rather than erroring, so the widget doesn't go blank — but numbers
   can go stale.
-- **Rate limits / IP blocks.** Scraping 22 profiles every 15 min from one
-  IP is moderate load. If you see failures spike, first move is slow the
+- **Rate limits / IP blocks.** Scraping 23 profiles 2x a day is light load. If you see failures spike, first move is slow the
   cron down (`src/server.js`) and the per-talent delay (`src/refresh.js`),
   next move is a rotating proxy or paid API.
 - **ToS.** Scraping TikTok/Instagram outside their official APIs isn't
